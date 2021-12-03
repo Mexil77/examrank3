@@ -13,9 +13,23 @@ void	ft_freeall(t_board *b)
 	}
 }
 
-int	ft_error(char *err, t_board *b)
+size_t	ft_strlen(char *str)
 {
-	printf("%s", err);
+	size_t	i;
+
+	if (!str)
+		return (0);
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
+
+int	ft_error(char *err, t_board *b, FILE *fd)
+{
+	if (fd)
+		fclose(fd);
+	write(1,err,ft_strlen(err));
 	ft_freeall(b);
 	return (1);
 }
@@ -109,20 +123,19 @@ int	main(int argc, char **argv)
 	FILE	*fd;
 	t_board	board;
 
-	if (argc < 2 || argc > 2)
-		return (ft_error("Error: argument\n", &board));
 	board.board = NULL;
-	fd = fopen(argv[1], "r");
-	if (!fd)
-		return (ft_error("Error: Operation file corrupted\n", &board));
+	if (argc < 2 || argc > 2)
+		return (ft_error("Error: argument\n", &board, NULL));
+	if (!(fd = fopen(argv[1], "r")))
+		return (ft_error("Error: Operation file corrupted\n", &board, fd));
 	if (fscanf(fd, "%d %d %c\n", &board.w, &board.h, &board.bc) < 3)
-		return (ft_error("Error: Operation file corrupted\n", &board));
+		return (ft_error("Error: Operation file corrupted\n", &board, fd));
 	if (board.w < 0 || board.w >= 300 || board.h < 0 || board.h >= 300)
-		return (ft_error("Error: Operation file corrupted\n", &board));
+		return (ft_error("Error: Operation file corrupted\n", &board, fd));
 	if (ft_fillboard(&board))
-		return (ft_error("Error: Operation file corrupted\n", &board));
+		return (ft_error("Error: Operation file corrupted\n", &board, fd));
 	if (ft_paint(&board, fd))
-		return (ft_error("Error: Operation file corrupted\n", &board));
+		return (ft_error("Error: Operation file corrupted\n", &board, fd));
 	ft_printdraw(&board);
 	ft_freeall(&board);
 	fclose(fd);
